@@ -1,28 +1,179 @@
-<script>
-    const submitBtn = document.getElementById('submitBtn');
-    const fullNameInput = document.getElementById('fullName');
-    const formDiv = document.getElementById('checkin-form');
-    const confirmationDiv = document.getElementById('confirmation');
-
-    submitBtn.addEventListener('click', () => {
-        const name = fullNameInput.value.trim();
-
-        if (name === "") {
-            alert("Please enter your name.");
-            return;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guest Check-In Kiosk</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --bg-color: #f8fafc;
+            --text-color: #1e293b;
         }
 
-        // 1. Show the "Checking you in" message
-        formDiv.style.display = 'none';
-        confirmationDiv.style.display = 'block';
-        confirmationDiv.innerHTML = `<h2>Thank you, ${name}.</h2><p>Loading your portal...</p>`;
+        /* KIOSK HARDENING: Prevent text selection and modern look */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            cursor: default;
+        }
 
-        // 2. Wait 2 seconds, then navigate to your Instructure site
-        setTimeout(() => {
-            window.location.href = "http://worsham.instructure.com/";
-        }, 2000);
-    });
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-    // Disable right-click to keep it feeling like a "locked" app
-    document.addEventListener('contextmenu', event => event.preventDefault());
-</script>
+        .kiosk-container {
+            text-align: center;
+            background: white;
+            padding: 4rem;
+            border-radius: 2rem;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 600px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 2.5rem;
+            color: var(--primary-color);
+            font-weight: 800;
+        }
+
+        .input-group {
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            font-size: 1.4rem;
+            color: #64748b;
+        }
+
+        /* Allow text selection ONLY in the input box */
+        input[type="text"] {
+            width: 100%;
+            padding: 1.25rem;
+            font-size: 1.5rem;
+            border: 3px solid #e2e8f0;
+            border-radius: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+            user-select: text;
+            -webkit-user-select: text;
+            cursor: text;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary-color);
+        }
+
+        button {
+            width: 100%;
+            padding: 1.5rem;
+            font-size: 1.75rem;
+            font-weight: bold;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            margin-top: 1rem;
+        }
+
+        button:active {
+            transform: scale(0.97);
+            background-color: #1d4ed8;
+        }
+
+        #confirmation {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        #confirmation h2 {
+            font-size: 2.5rem;
+            color: #059669;
+            margin-bottom: 1rem;
+        }
+
+        #confirmation p {
+            font-size: 1.2rem;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="kiosk-container">
+        <div id="checkin-form">
+            <h1>Welcome</h1>
+            
+            <div class="input-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" placeholder="Enter your name" autocomplete="off">
+            </div>
+            
+            <button id="submitBtn">Check In</button>
+        </div>
+
+        <div id="confirmation">
+            <!-- Content will be injected by JS -->
+        </div>
+    </div>
+
+    <script>
+        const submitBtn = document.getElementById('submitBtn');
+        const fullNameInput = document.getElementById('fullName');
+        const formDiv = document.getElementById('checkin-form');
+        const confirmationDiv = document.getElementById('confirmation');
+
+        // Logic for Submission
+        submitBtn.addEventListener('click', () => {
+            const name = fullNameInput.value.trim();
+
+            if (name === "") {
+                alert("Please enter your name to proceed.");
+                return;
+            }
+
+            // 1. Hide form and show confirmation
+            formDiv.style.display = 'none';
+            confirmationDiv.style.display = 'block';
+            confirmationDiv.innerHTML = `
+                <h2>Thank you, ${name}!</h2>
+                <p>Checking you in and loading your portal...</p>
+            `;
+
+            // 2. Redirect to the Instructure URL after 2 seconds
+            setTimeout(() => {
+                window.location.href = "http://worsham.instructure.com/";
+            }, 2000);
+        });
+
+        // KIOSK HARDENING: Disable right-click menu
+        document.addEventListener('contextmenu', event => event.preventDefault());
+
+        // KIOSK HARDENING: Prevent user from accidentally refreshing or opening tabs
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape" || (e.ctrlKey && (e.key === 'r' || e.key === 'n' || e.key === 't'))) {
+                e.preventDefault();
+            }
+        });
+    </script>
+
+</body>
+</html>
